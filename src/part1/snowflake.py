@@ -1,21 +1,6 @@
-"""Twitter Snowflake identifier generator.
+import time
 
-Snowflake produces roughly time-ordered 64-bit integer identifiers without
-coordination between nodes. Each identifier packs the milliseconds elapsed
-since a custom epoch, a node identifier and a per-millisecond sequence counter
-into a single 63-bit positive integer (see ``constants`` for the layout).
-
-The public entry point is :func:`generate_snowflake_id`. It is stateless: the
-caller passes the sequence counter on every call and is responsible for
-advancing it within a millisecond and resetting it when the clock ticks over.
-
-Each packed field can be read back on its own with :func:`decode_timestamp_ms`,
-:func:`decode_node_id` and :func:`decode_sequence_id`.
-"""
-
-import time  
-
-from .constants import (  
+from .constants import (
     EPOCH_MS_DEFAULT,
     NODE_ID_DEFAULT,
     NODE_ID_MAX,
@@ -25,22 +10,26 @@ from .constants import (
 
 
 def read_current_millis(epoch_ms: int) -> int:
-    a = time() * 1000
+    a = int(time.time() * 1000)
+
     return a - epoch_ms
 
 
 def decode_timestamp_ms(snowflake_id: int, epoch_ms: int = EPOCH_MS_DEFAULT) -> int:
-    a = snowflake_id // 2**22
+    a = snowflake_id >> 22
+
     return a + epoch_ms
 
 
 def decode_node_id(snowflake_id: int) -> int:
-    a = (snowflake_id // 2**12) * 2**41
+    a = (snowflake_id >> 12) & 0b1111111111
+
     return a
 
 
 def decode_sequence_id(snowflake_id: int) -> int:
-    a = snowflake_id * 2**52
+    a = snowflake_id & 0b111111111111
+
     return a
 
 
@@ -49,19 +38,16 @@ def generate_snowflake_id(
     node_id: int = NODE_ID_DEFAULT,
     epoch_ms: int = EPOCH_MS_DEFAULT,
 ) -> int | None:
-    a = sequence_id * 2**52
-    b = (node_id // 2**12) * 2**42
-    c = epoch_ms // 2**22
-    if b > NODE_ID_MAX:
+    if node_id > NODE_ID_MAX or node_id < 0:
         m = f"node_id must be in [0,{NODE_ID_MAX}]"
         print(m)
         return None
-    if a > SEQUENCE_ID_MAX:
+    if sequence_id > SEQUENCE_ID_MAX or sequence_id < 0:
         m = f"sequence_id must be in [0,{SEQUENCE_ID_MAX}]"
         print(m)
         return None
-    if c > TIMESTAMP_MS_MAX:
+    if epoch_ms > TIMESTAMP_MS_MAX and epoch_ms < 0:
         m = "overflows"
         print(m)
         return None
-    return sequence_id
+    return read_current_millis(epoch_ms) << 22 | node_id << 12 | sequence_id
