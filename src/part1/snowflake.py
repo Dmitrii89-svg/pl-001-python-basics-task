@@ -13,9 +13,9 @@ Each packed field can be read back on its own with :func:`decode_timestamp_ms`,
 :func:`decode_node_id` and :func:`decode_sequence_id`.
 """
 
-import time  # noqa: F401
+import time  
 
-from .constants import (  # noqa: F401
+from .constants import (  
     EPOCH_MS_DEFAULT,
     NODE_ID_DEFAULT,
     NODE_ID_MAX,
@@ -25,23 +25,22 @@ from .constants import (  # noqa: F401
 
 
 def read_current_millis(epoch_ms: int) -> int:
-    a=time()*1000
-    return (a-epoch_ms)
+    a = time() * 1000
+    return a - epoch_ms
 
 
 def decode_timestamp_ms(snowflake_id: int, epoch_ms: int = EPOCH_MS_DEFAULT) -> int:
-    a=snowflake_id//2**22
-    return (a+epoch_ms)
-
+    a = snowflake_id // 2**22
+    return a + epoch_ms
 
 
 def decode_node_id(snowflake_id: int) -> int:
-    a=(snowflake_id//2**12)*2**41
+    a = (snowflake_id // 2**12) * 2**41
     return a
 
 
 def decode_sequence_id(snowflake_id: int) -> int:
-    a=snowflake_id*2**52
+    a = snowflake_id * 2**52
     return a
 
 
@@ -50,19 +49,19 @@ def generate_snowflake_id(
     node_id: int = NODE_ID_DEFAULT,
     epoch_ms: int = EPOCH_MS_DEFAULT,
 ) -> int | None:
-    a=sequence_id*2**52
-    b=(node_id//2**12)*2**42
-    c=epoch_ms//2**22
-    if b>NODE_ID_MAX:
-        m=f'node_id must be in [0,{NODE_ID_MAX}]'
+    a = sequence_id * 2**52
+    b = (node_id // 2**12) * 2**42
+    c = epoch_ms // 2**22
+    if b > NODE_ID_MAX:
+        m = f"node_id must be in [0,{NODE_ID_MAX}]"
         print(m)
         return None
-    if a>SEQUENCE_ID_MAX:
-        m=f'sequence_id must be in [0,{SEQUENCE_ID_MAX}]'
+    if a > SEQUENCE_ID_MAX:
+        m = f"sequence_id must be in [0,{SEQUENCE_ID_MAX}]"
         print(m)
         return None
-    if c>TIMESTAMP_MS_MAX:
-        m='overflows'
+    if c > TIMESTAMP_MS_MAX:
+        m = "overflows"
         print(m)
         return None
     return sequence_id
