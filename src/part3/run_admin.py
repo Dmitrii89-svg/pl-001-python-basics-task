@@ -38,7 +38,7 @@ def print_result(result: object) -> None:
     if result is not None:
         print(result)
 
-def run_command(storage, line):
+def run_command(storage: list[Product], line: str) -> bool:
     parts = line.split()
     if not parts:
         print(f"'{line}' is not a command")
@@ -74,15 +74,7 @@ def run_command(storage, line):
     return True
 
 def main() -> None:
-    """Run the admin console until the ``exit`` command is entered.
-
-    A single product store is created empty and kept in memory for the
-    whole session. Each iteration reads one line from stdin, strips its
-    surrounding whitespace and hands it to :func:`run_command`. A line
-    that names a command but whose id, price or quantity argument does
-    not parse is caught here and reported without stopping the loop; only
-    ``exit`` ends it.
-    """
+    
     storage: list[Product] = []
     running = True
 
