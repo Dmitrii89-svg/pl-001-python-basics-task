@@ -1,16 +1,14 @@
-
-
-from decimal import Decimal, InvalidOperation  
+from decimal import Decimal, InvalidOperation
 from typing import Final
 
-from .crud import (  
+from .crud import (
     create_product,
     delete_product,
     read_product,
     update_product,
 )
 from .storage import Product
-from .utils import get_storage_str_representation  
+from .utils import get_storage_str_representation
 
 
 # TODO: задайте приглашение и текст справки
@@ -31,12 +29,12 @@ line; everything before them is the product name, so it may contain spaces
 
 def show_help() -> None:
     print(HELP_TEXT)
-    
 
 
 def print_result(result: object) -> None:
     if result is not None:
         print(result)
+
 
 def run_command(storage: list[Product], line: str) -> bool:
     parts = line.split()
@@ -73,8 +71,9 @@ def run_command(storage: list[Product], line: str) -> bool:
     print(f"'{line}' is not a command")
     return True
 
+
 def main() -> None:
-    
+
     storage: list[Product] = []
     running = True
 
