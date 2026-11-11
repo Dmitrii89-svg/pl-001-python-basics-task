@@ -1,4 +1,18 @@
-from .storage import QUANTITY_KEY, Product
+"""Shopping-cart operations layered on top of the product store.
+
+The cart is a plain dictionary mapping each product identifier to the
+number of units of that product in the cart. Moving units between the
+store and the cart keeps the two sides in balance: :func:`add_to_cart` takes
+units out of stock, :func:`remove_from_cart` puts them back.
+
+Like the CRUD layer, the failure path never raises -- the operation prints
+an explanatory message to stdout and returns ``None``.
+"""
+
+from .storage import Product
+
+
+# TODO: при необходимости добавьте свои вспомогательные функции
 
 
 def add_to_cart(
@@ -8,25 +22,32 @@ def add_to_cart(
     product_id: str,
     quantity: int,
 ) -> int | None:
+    """Move ``quantity`` units of ``product_id`` from the store into ``cart``.
 
-    if product_id not in storage:
-        print(f"no product with id {product_id}")
-        return None
+    The product is looked up in ``storage``. If it is missing, a message is
+    printed and nothing changes. If the store holds fewer units than
+    requested, an explanatory message is printed and nothing changes.
+    Otherwise the store record is decremented by ``quantity`` and the cart
+    gains ``quantity`` units of ``product_id`` -- the product is added when
+    the cart had none of it.
 
-    product = storage[product_id]
-    quantity_in_shop = product[QUANTITY_KEY]
+    Args:
+        storage: The product store to draw stock from; modified in place on
+            success.
+        product_names: The normalised names in ``storage``; a
+            quantity-only change never renames a product, so it is left
+            unchanged here.
+        cart: The cart to add the units to; modified in place on success.
+        product_id: The identifier of the product to add.
+        quantity: Number of units to move into the cart.
 
-    if quantity > quantity_in_shop:
-        print(
-            f"not enough stock for product {product_id}: {quantity_in_shop} available, {quantity} requested"
-        )
-        return None
-
-    product[QUANTITY_KEY] = quantity_in_shop - quantity
-
-    product_in_cart = cart.get(product_id, 0)
-    cart[product_id] = product_in_cart + quantity
-    return cart[product_id]
+    Returns:
+        The quantity of ``product_id`` in the cart after the addition, or
+        ``None`` when the product is unknown or the store cannot cover the
+        request.
+    """
+    # TODO: реализуйте функцию
+    return 0
 
 
 def remove_from_cart(
@@ -36,27 +57,31 @@ def remove_from_cart(
     product_id: str,
     quantity: int,
 ) -> int | None:
-    if product_id not in cart:
-        print(f"product {product_id} is not in the cart")
-        return None
+    """Move ``quantity`` units of ``product_id`` from ``cart`` back to the store.
 
-    if cart[product_id] < quantity:
-        print(
-            f"cart holds only {cart[product_id]} unit(s) of product {product_id}, cannot remove {quantity}"
-        )
-        return None
+    If the cart holds no units of ``product_id``, a message is printed and
+    nothing changes. If it holds fewer units than requested, an explanatory
+    message is printed and nothing changes. If the product is missing from
+    ``storage``, a message is printed and nothing changes. Otherwise the cart loses
+    ``quantity`` units of the product -- the product is dropped from the
+    cart when its quantity reaches zero -- and the store record gains
+    ``quantity`` units back.
 
-    if product_id not in storage:
-        print(f"no product with id {product_id}")
-        return None
+    Args:
+        storage: The product store to return stock to; modified in place on
+            success.
+        product_names: The normalised names in ``storage``; a
+            quantity-only change never renames a product, so it is left
+            unchanged here.
+        cart: The cart to take the units from; modified in place on
+            success.
+        product_id: The identifier of the product to remove.
+        quantity: Number of units to move back into the store.
 
-    product = storage[product_id]
-    product_in_shop = product[QUANTITY_KEY]
-    product[QUANTITY_KEY] = product_in_shop + quantity
-
-    if cart[product_id] == quantity:
-        del cart[product_id]
-        return 0
-
-    cart[product_id] -= quantity
-    return cart[product_id] - quantity
+    Returns:
+        The quantity of ``product_id`` left in the cart after the removal
+        (zero means the product was dropped from the cart), or ``None`` when
+        the cart does not hold the product or holds too few units.
+    """
+    # TODO: реализуйте функцию
+    return 0
